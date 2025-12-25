@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои книги - Librio{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 30px;">
+    <a href="{% url 'book_list' %}" class="btn" style="margin-bottom: 15px;">← Назад к каталогу</a>
+    <h1 style="margin: 0;">📖 Мои книги</h1>
+    <p style="color: var(--light-text); margin-top: 5px;">История ваших выдач</p>
+</div>
+
+{% if loan_data %}
+    <div class="grid">
+        {% for item in loan_data %}
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="margin: 0 0 10px 0;">{{ item.book.title|truncatechars:50 }}</h3>
+                    <p style="color: var(--light-text); margin: 0;">
+                        <span style="margin-right: 15px;">👤 {{ item.book.author.full_name }}</span>
+                        <span>📁 {{ item.book.genre.name }}</span>
+                    </p>
+                </div>
+                <span class="badge 
+                    {% if item.loan.status == 'active' %}badge-success
+                    {% elif item.loan.status == 'overdue' %}badge-danger
+                    {% else %}badge-info{% endif %}">
+                    {{ item.loan.get_status_display }}
+                </span>
+            </div>
+            
+            <div style="background: var(--light-bg); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div style="font-size: 0.9em; color: var(--light-text);">Дата выдачи</div>
+                        <strong>{{ item.loan.loan_date|date:"d.m.Y H:i" }}</strong>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9em; color: var(--light-text);">Срок до</div>
+                        <strong>{{ item.loan.expiry_date|date:"d.m.Y H:i" }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <a href="{% url 'book_detail' item.book.id %}" class="btn" style="width: 100%; text-align: center;">
+                    <span style="margin-right: 8px;">📖</span> Читать книгу
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: var(--light-text);">
+        Всего книг: {{ loan_data|length }}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 4em; margin-bottom: 20px; color: var(--light-text);">📚</div>
+        <h2 style="color: var(--light-text); margin-bottom: 15px;">У вас нет взятых книг</h2>
+        <p style="margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Найдите интересную книгу в каталоге и добавьте её в свою библиотеку
+        </p>
+        <a href="{% url 'book_list' %}" class="btn btn-success" style="padding: 12px 30px;">
+            <span style="margin-right: 8px;">🔍</span> Перейти к каталогу
+        </a>
+    </div>
+{% endif %}
+
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+</style>
+{% endblock %}

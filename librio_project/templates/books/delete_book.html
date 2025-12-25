@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить книгу - Librio{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 30px;">
+    <a href="{% url 'manage_books' %}" class="btn" style="margin-bottom: 15px;">← Назад к управлению</a>
+    <h1 style="margin: 0; color: var(--danger-color);">🗑️ Удалить книгу</h1>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto; border: 2px solid var(--danger-color);">
+    <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 60px; color: var(--danger-color); margin-bottom: 20px;">
+            ⚠️
+        </div>
+        
+        <h2 style="color: var(--danger-color); margin-bottom: 15px;">Подтверждение удаления</h2>
+        
+        <div class="book-info" style="background: var(--light-bg); padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="margin-top: 0;">{{ book.title }}</h3>
+            <p><strong>Автор:</strong> {{ book.author.full_name }}</p>
+            <p><strong>Жанр:</strong> {{ book.genre.name }}</p>
+            <p><strong>ID:</strong> #{{ book.id }}</p>
+        </div>
+        
+        <div class="alert alert-error" style="margin-bottom: 25px;">
+            <strong>Внимание!</strong> Это действие нельзя отменить. Книга будет удалена из базы данных навсегда.
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button type="submit" class="btn btn-danger" style="padding: 12px 30px; font-size: 1.1em;">
+                    <span style="margin-right: 8px;">🗑️</span> Да, удалить книгу
+                </button>
+                <a href="{% url 'manage_books' %}" class="btn" style="padding: 12px 30px; font-size: 1.1em;">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

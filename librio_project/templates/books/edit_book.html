@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать книгу - Librio{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 30px;">
+    <a href="{% url 'manage_books' %}" class="btn" style="margin-bottom: 15px;">← Назад к управлению</a>
+    <h1 style="margin: 0;">✏️ Редактировать книгу</h1>
+    <p style="color: var(--light-text); margin-top: 5px;">{{ book.title }}</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Простая форма ручными полями -->
+        <div class="form-group">
+            <label>📖 Название книги *</label>
+            <input type="text" name="title" class="form-control" required value="{{ book.title }}" placeholder="Введите название книги">
+        </div>
+
+        <div class="form-group">
+            <label>👤 Автор *</label>
+            <select name="author" class="form-control" required>
+                <option value="">Выберите автора</option>
+                {% for author in authors %}
+                <option value="{{ author.id }}" {% if author.id == book.author.id %}selected{% endif %}>
+                    {{ author.full_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>📁 Жанр *</label>
+            <select name="genre" class="form-control" required>
+                <option value="">Выберите жанр</option>
+                {% for genre in genres %}
+                <option value="{{ genre.id }}" {% if genre.id == book.genre.id %}selected{% endif %}>
+                    {{ genre.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label>🔒 Уровень доступа</label>
+                <select name="access_level" class="form-control">
+                    <option value="free">Свободный</option>
+                    <option value="limited">Ограниченный</option>
+                    <option value="premium">Премиум</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>⏱️ Макс. дней выдачи</label>
+                <input type="number" name="max_loan_days" class="form-control" value="{{ book.max_loan_days }}" min="1" max="365">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>📝 Описание (необязательно)</label>
+            <textarea name="description" class="form-control" rows="4" placeholder="Описание книги...">{{ book.description|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>📊 Статус доступности</label>
+            <select name="is_available" class="form-control">
+                <option value="true" {% if book.is_available %}selected{% endif %}>Доступна</option>
+                <option value="false" {% if not book.is_available %}selected{% endif %}>Недоступна</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button type="submit" class="btn btn-success" style="flex: 1;">
+                <span style="margin-right: 8px;">💾</span> Сохранить изменения
+            </button>
+            <a href="{% url 'manage_books' %}" class="btn" style="flex: 1; text-align: center;">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    select.form-control {
+        height: 42px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Чтение: {{ book.title }} - Librio{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reader-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .book-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .book-content {
+        font-family: 'Georgia', serif;
+        font-size: 18px;
+        line-height: 1.8;
+        text-align: justify;
+        min-height: 500px;
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        /* Защита от копирования (базовая) */
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .page-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        padding: 15px;
+        background: var(--light-bg);
+        border-radius: 8px;
+    }
+
+    .watermark {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        opacity: 0.1;
+        font-size: 12px;
+        color: #000;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-container">
+    <div class="book-header">
+        <h1>{{ book.title }}</h1>
+        <p><em>{{ book.author.full_name }}</em></p>
+        <div class="badge badge-success">
+            📖 Страница {{ page_num }} из {{ total_pages }}
+        </div>
+    </div>
+
+    <div class="book-content" id="book-text">
+        {{ current_page|linebreaks }}
+    </div>
+
+    <div class="page-navigation">
+        {% if page_num > 1 %}
+        <a href="?page={{ page_num|add:'-1' }}" class="btn">
+            ← Предыдущая страница
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+
+        <div>
+            <form method="get" style="display: inline;">
+                <input type="number" name="page" min="1" max="{{ total_pages }}"
+                       value="{{ page_num }}" style="width: 60px;">
+                <button type="submit" class="btn">Перейти</button>
+            </form>
+        </div>
+
+        {% if page_num < total_pages %}
+        <a href="?page={{ page_num|add:'1' }}" class="btn">
+            Следующая страница →
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'book_detail' book.id %}" class="btn">
+            ← Вернуться к описанию книги
+        </a>
+
+        {% if user.userprofile.user_type in 'admin,librarian'|split:',' %}
+        <a href="/admin/books/bookcontent/{{ book.content.id }}/change/"
+           class="btn btn-warning" target="_blank">
+            ✏️ Редактировать текст
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="watermark">
+    User: {{ user.id }} | Book: {{ book.id }} | Page: {{ page_num }} | Date: {% now "Y-m-d H:i:s" %}
+</div>
+
+<script>
+// Базовая защита от копирования
+document.addEventListener('DOMContentLoaded', function() {
+    const bookText = document.getElementById('book-text');
+
+    // Блокируем правый клик
+    bookText.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showMessage('Копирование текста запрещено');
+    });
+
+    // Блокируем выделение текста (частично)
+    bookText.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+    });
+
+    // Блокируем Ctrl+C, Ctrl+S
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p')) {
+            e.preventDefault();
+            showMessage('Действие запрещено');
+        }
+
+        // Сочетания для навигации разрешаем
+        if (e.key === 'ArrowLeft' && {{ page_num }} > 1) {
+            window.location.href = `?page={{ page_num|add:"-1" }}`;
+        }
+        if (e.key === 'ArrowRight' && {{ page_num }} < {{ total_pages }}) {
+            window.location.href = `?page={{ page_num|add:"1" }}`;
+        }
+    });
+
+    function showMessage(text) {
+        // Можно сделать красивый toast
+        alert(text);
+    }
+});
+</script>
+{% endblock %}

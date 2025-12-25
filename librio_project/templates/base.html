@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Librio - Электронная библиотека{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+
+    <!-- CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h1 style="margin: 0; font-size: 1.5em;">📚 Librio</h1>
+            </div>
+
+            <div class="nav-links">
+                <a href="{% url 'book_list' %}">Каталог</a>
+
+                {% if user.is_authenticated %}
+                    {% with user_type=user.userprofile.user_type|default:"student" %}
+                        <a href="{% url 'my_loans' %}">Мои книги</a>
+
+                        {% if user_type == 'admin' or user_type == 'librarian' %}
+                            <a href="{% url 'manage_books' %}">Управление</a>
+                        {% endif %}
+
+                        {% if user_type == 'admin' %}
+                            <a href="{% url 'admin_dashboard' %}">Дашборд</a>
+                        {% endif %}
+
+
+                        <span style="color: #ecf0f1;">{{ user.username }}</span>
+                        <a href="{% url 'logout' %}" class="btn btn-danger" style="padding: 5px 10px;">Выйти</a>
+                    {% endwith %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn" style="padding: 5px 10px;">Войти</a>
+                    <a href="{% url 'register' %}" class="btn btn-success" style="padding: 5px 10px;">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Сообщения -->
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Основной контент -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer style="margin-top: 50px; padding: 20px 0; background: var(--light-bg); border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <p style="text-align: center; color: var(--light-text);">
+                &copy; {% now "Y" %} Librio - Электронная библиотека. Владимирский государственный университет.
+            </p>
+            <p style="text-align: center; color: var(--light-text); font-size: 0.9em;">
+                Студент: Чайка Д.М. | Группа: ИБ-123 | Курсовая работа по Базам данных и экспертным системам
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
